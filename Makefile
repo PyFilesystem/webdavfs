@@ -2,6 +2,7 @@ all: install test
 
 install:
 	virtualenv .
+	bin/pip --upgrade pip
 	bin/python setup.py develop
 
 test:
