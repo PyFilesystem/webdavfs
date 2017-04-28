@@ -15,6 +15,8 @@ Supported Python versions
 Usage
 -----
 
+.. code:: python
+
     > from webdavfs.webdavfs import WebDAVFS
     > url = 'http://zopyx.com:22082'
     > creds = dict(login='admin', password='admin')
