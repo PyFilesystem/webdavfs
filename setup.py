@@ -38,7 +38,7 @@ setup(
     platforms=['any'],
     test_suite="nose.collector",
     url="http://pypi.python.org/pypi/fs.webdavfs/",
-    version="0.1"
+    version="0.1.1"
 )
 
 
