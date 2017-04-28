@@ -18,4 +18,3 @@ after_success:
 # command to run tests
 script:
   - make test
-
