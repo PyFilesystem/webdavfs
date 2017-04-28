@@ -113,7 +113,7 @@ class WebDAVFile(object):
         return lines
 
     def read(self, size=None):
-        if not self._mode.reading   :
+        if not self._mode.reading:
             raise IOError("File is not in read mode")
         if size:
             self.pos += size
