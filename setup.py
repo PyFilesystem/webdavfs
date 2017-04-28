@@ -16,7 +16,8 @@ CLASSIFIERS = [
     'Topic :: System :: Filesystems',
 ]
 
-with open('README.rst', 'r', encoding='utf8') as f:
+import io
+with io.open('README.rst', 'r', encoding='utf8') as f:
     DESCRIPTION = f.read()
 
 REQUIREMENTS = [
