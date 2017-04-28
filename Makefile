@@ -8,5 +8,5 @@ install:
 
 test:
 	bin/pip install nose
-	bin/nosetests -v fswebdavfs
+	bin/nosetests -v fswebdav
 
