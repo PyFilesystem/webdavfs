@@ -40,3 +40,5 @@ setup(
     url="http://pypi.python.org/pypi/fs.webdavfs/",
     version="0.1"
 )
+
+
