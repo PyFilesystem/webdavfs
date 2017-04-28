@@ -12,6 +12,18 @@ Supported Python versions
 - Python 3.5
 - Python 3.6
 
+Usage
+-----
+
+    > from webdavfs.webdavfs import WebDAVFS
+    > url = 'http://zopyx.com:22082'
+    > creds = dict(login='admin', password='admin')
+    > root = '/exist/webdav/db'
+    > handle = WebDAVFS(url, cred, root)
+    > handle.makedir('foo')
+    > print(handle.listdir('.'))
+    ....
+
 Repository
 ----------
 

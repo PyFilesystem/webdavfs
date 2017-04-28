@@ -4,7 +4,7 @@ import json
 import os
 import unittest
 
-from fswebdav import webdavfs
+from webdavfs import webdavfs
 from fs.test import FSTestCases
 
 from nose.plugins.attrib import attr
