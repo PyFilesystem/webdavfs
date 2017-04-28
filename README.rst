@@ -42,7 +42,7 @@ License
 This module is published under the BSD license.
 
 Author
------
+------
 
 | Andreas Jung/ZOPYX
 | Hundskapfklinge 33
