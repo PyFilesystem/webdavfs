@@ -13,13 +13,13 @@ import webdav2.client as wc
 import webdav2.exceptions as we
 import webdav2.urn as wu
 
-from . import errors
-from .base import FS
-from .enums import ResourceType, Seek
-from .info import Info
-from .iotools import line_iterator
-from .mode import Mode
-from .path import abspath, normpath
+from fs import errors
+from fs.base import FS
+from fs.enums import ResourceType, Seek
+from fs.info import Info
+from fs.iotools import line_iterator
+from fs.mode import Mode
+from fs.path import abspath, normpath
 
 
 log = logging.getLogger(__name__)

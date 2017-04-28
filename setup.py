@@ -21,6 +21,7 @@ with open('README.txt', 'r') as f:
 
 REQUIREMENTS = [
     "fs>=2.0.0",
+    "webdavclient2"
 ]
 
 setup(
