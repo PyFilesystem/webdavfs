@@ -22,7 +22,8 @@ with io.open('README.rst', 'r', encoding='utf8') as f:
 
 REQUIREMENTS = [
     "fs>=2.0.0",
-    "webdavclient2"
+    "webdavclient2",
+    "furl"
 ]
 
 setup(

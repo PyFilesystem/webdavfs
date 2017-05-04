@@ -5,9 +5,11 @@ install:
 	bin/pip install -U pip
 	bin/pip install -U setuptools
 	bin/python setup.py develop
-	docker run -d -p 127.0.0.1:8080:8080 zopyx/existdb-30
 
 test:
 	bin/pip install nose
-	bin/nosetests -v webdavfs
+	/usr/bin/python -c "import os; os.system('docker rm -f existdb30')"
+	docker run -d -p 127.0.0.1:10080:8080 --name existdb30 zopyx/existdb-30
+	sleep 30
+	FS_WEBDAV_URL=http://admin:admin@localhost:10080/exist/webdav/db bin/nosetests -v webdavfs
 
