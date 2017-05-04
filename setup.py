@@ -20,6 +20,9 @@ import io
 with io.open('README.rst', 'r', encoding='utf8') as f:
     DESCRIPTION = f.read()
 
+with io.open('HISTORY.rst', 'r', encoding='utf8') as f:
+    HISTORY = f.read()
+
 REQUIREMENTS = [
     "fs>=2.0.0",
     "webdavclient2",
@@ -33,13 +36,13 @@ setup(
     description="WebDAV support for pyfilesystem2",
     install_requires=REQUIREMENTS,
     license="BSD",
-    long_description=DESCRIPTION,
+    long_description=DESCRIPTION + "\n" + HISTORY,
     name='fs.webdavfs',
     packages=find_packages(exclude=("tests",)),
     platforms=['any'],
     test_suite="nose.collector",
     url="http://pypi.python.org/pypi/fs.webdavfs/",
-    version="0.1.1"
+    version="0.2.0"
 )
 
 
