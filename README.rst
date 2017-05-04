@@ -41,13 +41,24 @@ Tests
 
 - https://travis-ci.org/PyFilesystem/webdavfs/builds
 
+Author and contributors
+-----------------------
+
+- Yuriy H.
+- Semyon Gaivoronskiy
+- Andreas Jung
+
+
 License
 -------
 
 This module is published under the BSD license.
 
-Author
-------
+This module was sponsored and financed by Andreas Jung/ZOPYX
+
+
+Contact
+-------
 
 | Andreas Jung/ZOPYX
 | Hundskapfklinge 33
