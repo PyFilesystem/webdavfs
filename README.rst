@@ -36,6 +36,11 @@ Issue tracker
 
 - https://github.com/PyFilesystem/webdavfs/issues
 
+Tests
+-----
+
+- https://travis-ci.org/PyFilesystem/webdavfs/builds
+
 License
 -------
 
