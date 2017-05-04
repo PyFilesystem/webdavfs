@@ -5,10 +5,6 @@ import six
 import threading
 import logging
 
-# import webdav.client as wc
-# import webdav.exceptions as we
-# import webdav.urn as wu
-
 import webdav2.client as wc
 import webdav2.exceptions as we
 import webdav2.urn as wu
