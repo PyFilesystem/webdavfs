@@ -44,7 +44,7 @@ Tests
 Author and contributors
 -----------------------
 
-- Yuriy H.
+- Yuriy Homyakov
 - Semyon Gaivoronskiy
 - Andreas Jung
 
