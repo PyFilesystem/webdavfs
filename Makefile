@@ -1,5 +1,8 @@
 all: install test
 
+release:
+	mkrelease -p -d pypi
+
 install:
 	virtualenv .
 	bin/pip install -U pip
