@@ -11,7 +11,7 @@ from fs.test import FSTestCases
 
 from nose.plugins.attrib import attr
 
-webdav_url = os.environ.get('FS_WEBDAV_URL', 'http://admin:admin@zopyx.com:20082/exist/webdav/db')
+webdav_url = os.environ.get('FS_WEBDAV_URL', 'http://admin:admin@zopyx.com:22082/exist/webdav/db')
 
 @attr('slow')
 class TestWebDAVFS(unittest.TestCase):
@@ -36,7 +36,7 @@ class TestWebDAVFS(unittest.TestCase):
 
     def test_directories_mkdir_removedir(self):
         fs = self.make_fs()
-        for i in range(10):
+        for i in range(5):
             fs.makedir(unicode(i))
-        for i in range(10):
+        for i in range(5):
             fs.removedir(unicode(i))
