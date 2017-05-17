@@ -22,4 +22,4 @@ after_success:
 
 # command to run tests
 script:
-  - make test test-existdb
+  - make test test-existdb-22 test-basex

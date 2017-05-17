@@ -16,6 +16,13 @@ test:
 	sleep 30
 	FS_WEBDAV_URL=http://admin:admin@localhost:10080/exist/webdav/db bin/nosetests -v webdavfs
 
+test-existdb-22:
+	bin/pip install nose
+	/usr/bin/python -c "import os; os.system('docker rm -f existdb22')"
+	docker run -d -p 127.0.0.1:10082:8080 --name existdb22 zopyx/existdb-22
+	sleep 30
+	FS_WEBDAV_URL=http://admin:admin@localhost:10082/exist/webdav/db bin/nosetests -v webdavfs
+
 test-basex:
 	bin/pip install nose
 	/usr/bin/python -c "import os; os.system('docker rm -f basex')"
