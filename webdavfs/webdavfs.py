@@ -26,9 +26,11 @@ details = frozenset(('type', 'accessed', 'modified', 'created',
 access = frozenset(('permissions', 'user', 'uid', 'group', 'gid'))
 
 
-class WebDAVFile(object):
+class WebDAVFile(io.RawIOBase):
 
     def __init__(self, wdfs, path, mode):
+        super(WebDAVFile, self).__init__()
+
         self.fs = wdfs
         self.path = path
         self.res = self.fs.get_resource(self.path)
@@ -38,7 +40,6 @@ class WebDAVFile(object):
         self.data = self._get_file_data()
 
         self.pos = 0
-        self.closed = False
 
         if 'a' in mode:
             self.pos = self._get_data_size()
@@ -55,34 +56,26 @@ class WebDAVFile(object):
 
             return data
 
-    def _get_data_size(self):
-        if six.PY2:
+    if six.PY2:
+        def _get_data_size(self):
             return len(self.data.getvalue())
-        else:
+    else:
+        def _get_data_size(self):
             return self.data.getbuffer().nbytes
 
     def __repr__(self):
         _repr = "WebDAVFile({!r}, {!r}, {!r})"
         return _repr.format(self.fs, self.path, self.mode)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.close()
-
     def __iter__(self):
         return line_iterator(self)
-
-    def __del__(self):
-        self.close()
 
     def close(self):
         if not self.closed:
             log.debug("closing")
             self.flush()
             self.data.close()
-            self.closed = True
+            super(WebDAVFile, self).close()
 
     def flush(self):
         if self._mode.writing:
@@ -90,13 +83,8 @@ class WebDAVFile(object):
             self.data.seek(io.SEEK_SET)
             self.res.read_from(self.data)
 
-    def next(self):
-        return self.readline()
-
-    __next__ = next
-
-    def readline(self, size=None):
-        return next(line_iterator(self, size))
+    def readline(self, size=-1):
+        return next(line_iterator(self, None if size==-1 else size))
 
     def readlines(self, hint=-1):
         lines = []
@@ -108,10 +96,13 @@ class WebDAVFile(object):
                 break
         return lines
 
-    def read(self, size=None):
-        if not self._mode.reading:
-            raise IOError("File is not in read mode")
-        if size:
+    def readable(self):
+        return self._mode.reading
+
+    def read(self, size=-1):
+        # if not self._mode.reading:
+        #     raise IOError("File is not in read mode")
+        if size != -1:
             self.pos += size
         return self.data.read(size)
 
@@ -130,15 +121,21 @@ class WebDAVFile(object):
     def tell(self):
         return self.pos
 
+    def tellable(self):
+        return True
+
     def truncate(self, size=None):
         self.data.truncate(size)
         data_size = self._get_data_size()
         if size and data_size < size:
             self.data.write(b'\0' * (size - data_size))
 
+    def writable(self):
+        return self._mode.writing
+
     def write(self, data):
-        if not self._mode.writing:
-            raise IOError("File is not in write mode")
+        # if not self._mode.writing:
+        #     raise IOError("File is not in write mode")
         self.data.write(data)
         self.seek(len(data), Seek.current)
 
