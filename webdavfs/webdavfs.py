@@ -106,6 +106,9 @@ class WebDAVFile(io.RawIOBase):
             self.pos += size
         return self.data.read(size)
 
+    def seekable(self):
+        return True
+
     def seek(self, pos, whence=Seek.set):
         if whence == Seek.set:
             self.pos = pos
