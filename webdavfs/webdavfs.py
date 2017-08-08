@@ -73,9 +73,9 @@ class WebDAVFile(io.RawIOBase):
     def close(self):
         if not self.closed:
             log.debug("closing")
-            self.flush()
-            self.data.close()
+            #self.flush()
             super(WebDAVFile, self).close()
+            self.data.close()
 
     def flush(self):
         if self._mode.writing:
