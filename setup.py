@@ -34,6 +34,9 @@ setup(
     author_email="info@zopyx.com",
     classifiers=CLASSIFIERS,
     description="WebDAV support for pyfilesystem2",
+    entry_points={
+        'fs.opener': 'webdav = webdavfs.opener:WebDAVOpener'
+    },
     install_requires=REQUIREMENTS,
     license="BSD",
     long_description=DESCRIPTION + "\n" + HISTORY,
@@ -44,5 +47,3 @@ setup(
     url="http://pypi.python.org/pypi/fs.webdavfs/",
     version="0.2.1"
 )
-
-
