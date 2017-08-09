@@ -7,7 +7,7 @@ install:
 	virtualenv .
 	bin/pip install -U pip
 	bin/pip install -U setuptools
-	bin/python setup.py develop
+	bin/pip install -e .
 
 test:
 	bin/pip install nose
