@@ -67,9 +67,6 @@ class WebDAVFile(io.RawIOBase):
         _repr = "WebDAVFile({!r}, {!r}, {!r})"
         return _repr.format(self.fs, self.path, self.mode)
 
-    def __iter__(self):
-        return line_iterator(self)
-
     def close(self):
         if not self.closed:
             log.debug("closing")
@@ -85,16 +82,6 @@ class WebDAVFile(io.RawIOBase):
 
     def readline(self, size=-1):
         return next(line_iterator(self, None if size==-1 else size))
-
-    def readlines(self, hint=-1):
-        lines = []
-        size = 0
-        for line in line_iterator(self):
-            lines.append(line)
-            size += len(line)
-            if hint != -1 and size > hint:
-                break
-        return lines
 
     def readable(self):
         return self._mode.reading
@@ -145,9 +132,6 @@ class WebDAVFile(io.RawIOBase):
             raise IOError("File is not in write mode")
         self.data.write(data)
         self.seek(len(data), Seek.current)
-
-    def writelines(self, lines):
-        self.write(b''.join(lines))
 
 
 class WebDAVFS(FS):
