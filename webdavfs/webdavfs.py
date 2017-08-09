@@ -73,7 +73,7 @@ class WebDAVFile(io.RawIOBase):
     def close(self):
         if not self.closed:
             log.debug("closing")
-            #self.flush()
+            self.flush()
             super(WebDAVFile, self).close()
             self.data.close()
 
@@ -100,8 +100,8 @@ class WebDAVFile(io.RawIOBase):
         return self._mode.reading
 
     def read(self, size=-1):
-        # if not self._mode.reading:
-        #     raise IOError("File is not in read mode")
+        if not self._mode.reading:
+            raise IOError("File is not in read mode")
         if size != -1:
             self.pos += size
         return self.data.read(size)
@@ -137,8 +137,8 @@ class WebDAVFile(io.RawIOBase):
         return self._mode.writing
 
     def write(self, data):
-        # if not self._mode.writing:
-        #     raise IOError("File is not in write mode")
+        if not self._mode.writing:
+            raise IOError("File is not in write mode")
         self.data.write(data)
         self.seek(len(data), Seek.current)
 
