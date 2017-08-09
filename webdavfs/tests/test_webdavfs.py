@@ -5,6 +5,7 @@ import furl
 import json
 import os
 import unittest
+import fs
 
 from webdavfs import webdavfs
 from fs.test import FSTestCases
@@ -33,7 +34,7 @@ class TestWebDAVFS(FSTestCases, unittest.TestCase):
             handle.rmdir(self.test_root, recursive=True)
         handle.makedir(self.test_root)
         handle = webdavfs.WebDAVFS(url, creds, root + '/' + self.test_root)
-        return handle
+        return fs.open_fs(webdav_url.replace('http', 'webdav'))
 
     def destroy_fs(self, fs):
         for item in fs.client.list('/'):
