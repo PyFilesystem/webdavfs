@@ -111,10 +111,14 @@ class WebDAVFile(io.RawIOBase):
 
     def seek(self, pos, whence=Seek.set):
         if whence == Seek.set:
+            if pos < 0:
+                raise ValueError('Negative seek position {}'.format(pos))
             self.pos = pos
         elif whence == Seek.current:
-            self.pos = self.pos + pos
+            self.pos = max(0, self.pos + pos)
         elif whence == Seek.end:
+            if pos > 0:
+                raise ValueError('Positive seek position {}'.format(pos))
             self.pos = max(0, self._get_data_size() + pos)
         else:
             raise ValueError('invalid value for whence')
