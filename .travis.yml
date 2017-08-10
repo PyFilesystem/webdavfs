@@ -14,13 +14,15 @@ python:
   - "3.6"
 
 before_install:
-  - make pull
+  # Pull docker images early for a more responsive nosetests run
+  - echo zopyx/basex-86 zopyx/existdb-22 zopyx/existdb-30 | xargs -n1 docker pull
 
 install:
-  - make install
+  - pip install -U pip setuptools wheel
+  - pip install .
+
+script:
+  - python setup.py nosetests
 
 after_success:
   - coveralls
-
-script:
-  - make test
