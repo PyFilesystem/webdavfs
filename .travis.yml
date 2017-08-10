@@ -1,6 +1,5 @@
 language: python
-dist: trusty
-sudo: required
+sudo: false
 
 cache: pip
 
@@ -14,12 +13,14 @@ python:
   - "3.5"
   - "3.6"
 
+before_install:
+  - make pull
+
 install:
   - make install
 
 after_success:
   - coveralls
 
-# command to run tests
 script:
-  - make test test-existdb-22 test-basex
+  - make test

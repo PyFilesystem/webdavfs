@@ -37,6 +37,7 @@ setup(
         'fs.opener': 'webdav = webdavfs.opener:WebDAVOpener'
     },
     install_requires=REQUIREMENTS,
+    tests_require=['docker'],
     license="BSD",
     long_description=DESCRIPTION + "\n" + HISTORY,
     name='fs.webdavfs',
