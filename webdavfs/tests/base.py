@@ -13,7 +13,7 @@ class _TestWebDAVFS(object):
     webdav_url = NotImplemented
 
     def setUp(self):
-        self.test_root = uuid.uuid4().hex
+        self.test_root = '{}'.format(uuid.uuid4())
         self.fs = self.make_fs()
 
     def make_fs(self):
@@ -30,6 +30,6 @@ class _TestWebDAVFS(object):
 
     def test_directories_mkdir_removedir(self):
         for i in range(5):
-            self.fs.makedir('{}'.format(i))
+            self.fs.makedir(u'{}'.format(i))
         for i in range(5):
-            self.fs.removedir('{}'.format(i))
+            self.fs.removedir(u'{}'.format(i))
