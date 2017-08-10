@@ -44,7 +44,6 @@ setup(
     packages=find_packages(exclude=("tests",)),
     platforms=['any'],
     setup_requires=['nose'],
-    test_suite="nose.collector",
     url="http://pypi.python.org/pypi/fs.webdavfs/",
     version="0.2.1"
 )
