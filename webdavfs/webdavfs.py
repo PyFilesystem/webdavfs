@@ -115,9 +115,6 @@ class WebDAVFile(io.RawIOBase):
     def tell(self):
         return self.pos
 
-    def tellable(self):
-        return True
-
     def truncate(self, size=None):
         self.data.truncate(size)
         data_size = self._get_data_size()
