@@ -57,10 +57,10 @@ class WebDAVFile(io.RawIOBase):
             return data
 
     if six.PY2:
-        def _get_data_size(self):
+        def __length_hint__(self):
             return len(self.data.getvalue())
     else:
-        def _get_data_size(self):
+        def __length_hint__(self):
             return self.data.getbuffer().nbytes
 
     def __repr__(self):
@@ -89,7 +89,7 @@ class WebDAVFile(io.RawIOBase):
     def read(self, size=-1):
         if not self._mode.reading:
             raise IOError("File is not in read mode")
-        self.pos = self.pos + size if size != -1 else self._get_data_size()
+        self.pos = self.pos + size if size != -1 else self.__length_hint__()
         return self.data.read(size)
 
     def seekable(self):
@@ -105,7 +105,7 @@ class WebDAVFile(io.RawIOBase):
         elif whence == Seek.end:
             if pos > 0:
                 raise ValueError('Positive seek position {}'.format(pos))
-            self.pos = max(0, self._get_data_size() + pos)
+            self.pos = max(0, self.__length_hint__() + pos)
         else:
             raise ValueError('invalid value for whence')
 
@@ -117,9 +117,10 @@ class WebDAVFile(io.RawIOBase):
 
     def truncate(self, size=None):
         self.data.truncate(size)
-        data_size = self._get_data_size()
+        data_size = self.__length_hint__()
         if size and data_size < size:
             self.data.write(b'\0' * (size - data_size))
+        return size or data_size
 
     def writable(self):
         return self._mode.writing
@@ -127,8 +128,10 @@ class WebDAVFile(io.RawIOBase):
     def write(self, data):
         if not self._mode.writing:
             raise IOError("File is not in write mode")
-        self.data.write(data)
-        self.seek(len(data), Seek.current)
+        bytes_written = self.data.write(data)
+        self.seek(bytes_written, Seek.current)
+        return bytes_written
+
 
 
 class WebDAVFS(FS):
@@ -199,11 +202,10 @@ class WebDAVFS(FS):
         return self.client.check(path)
 
     def getinfo(self, path, namespaces=None):
-        self.check()
         _path = self.validatepath(path)
         namespaces = namespaces or ()
 
-        if _path == '/':
+        if _path in '/':
             return Info({
                 "basic":
                 {
@@ -221,7 +223,7 @@ class WebDAVFS(FS):
             info_dict = self._create_info_dict(info)
             if self.isdir(path):
                 info_dict['basic']['is_dir'] = True
-                info_dict['details']['type'] = int(ResourceType.directory)
+                info_dict['details']['type'] = ResourceType.directory
             return Info(info_dict)
         except we.RemoteResourceNotFound as exc:
             raise errors.ResourceNotFound(path, exc=exc)
@@ -230,43 +232,33 @@ class WebDAVFS(FS):
         self.check()
         _path = self.validatepath(path)
 
-        if not self.exists(_path):
-            raise errors.ResourceNotFound(path)
-        if not self.isdir(_path):
+        if not self.getinfo(_path).is_dir:
             raise errors.DirectoryExpected(path)
 
         dir_list = self.client.list(_path)
-        if six.PY2:
-            dir_list = [six.u(item) for item in dir_list]
-
-        return dir_list
+        return map(six.u, dir_list) if six.PY2 else dir_list
 
     def makedir(self, path, permissions=None, recreate=False):
-        self.check()
         self.validatepath(path)
         _path = abspath(normpath(path))
 
         if _path == '/':
-            if recreate:
-                return self.opendir(path)
-            else:
+            if not recreate:
                 raise errors.DirectoryExists(path)
 
-        if not (recreate and self.isdir(path)):
+        elif not (recreate and self.isdir(path)):
             if self.exists(_path):
                 raise errors.DirectoryExists(path)
-
             try:
                 self.client.mkdir(_path)
-            except we.RemoteParentNotFound:
-                raise errors.ResourceNotFound(path)
+            except we.RemoteParentNotFound as exc:
+                raise errors.ResourceNotFound(path, exc=exc)
 
         return self.opendir(path)
 
     def openbin(self, path, mode='r', buffering=-1, **options):
         _mode = Mode(mode)
         _mode.validate_bin()
-        self.check()
         self.validatepath(path)
 
         log.debug("openbin: %s, %s", path, mode)
@@ -289,7 +281,7 @@ class WebDAVFS(FS):
         if not self.exists(path):
             raise errors.ResourceNotFound(path)
 
-        if self.isdir(path):
+        if self.getinfo(path).is_dir:
             raise errors.FileExpected(path)
 
         self.client.clean(path)
