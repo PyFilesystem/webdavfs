@@ -1,4 +1,5 @@
-from contextlib import closing
+# coding: utf-8
+
 import io
 import os
 import six
@@ -35,21 +36,24 @@ class WebDAVFile(io.RawIOBase):
         self.path = path
         self.res = self.fs.get_resource(self.path)
         self.mode = mode
-        self._mode = Mode(mode)
         self._lock = threading.RLock()
         self.data = self._get_file_data()
 
         self.pos = 0
 
-        if 'a' in mode:
-            self.pos = self._get_data_size()
+        if self.mode.appending:
+            self.pos = self.__length_hint__()
+        if self.mode.writing:
+            self.write(b'')
+        if self.mode.reading:
+            self.read(0)
 
     def _get_file_data(self):
         with self._lock:
             data = io.BytesIO()
             try:
                 self.res.write_to(data)
-                if 'a' not in self.mode:
+                if not self.mode.appending:
                     data.seek(io.SEEK_SET)
             except we.RemoteResourceNotFound:
                 data.write(b'')
@@ -65,7 +69,7 @@ class WebDAVFile(io.RawIOBase):
 
     def __repr__(self):
         _repr = "WebDAVFile({!r}, {!r}, {!r})"
-        return _repr.format(self.fs, self.path, self.mode)
+        return _repr.format(self.fs, self.path, self.mode.to_platform_bin())
 
     def close(self):
         if not self.closed:
@@ -75,7 +79,7 @@ class WebDAVFile(io.RawIOBase):
             self.data.close()
 
     def flush(self):
-        if self._mode.writing:
+        if self.mode.writing:
             log.debug("flush")
             self.data.seek(io.SEEK_SET)
             self.res.read_from(self.data)
@@ -84,10 +88,10 @@ class WebDAVFile(io.RawIOBase):
         return next(line_iterator(self, None if size==-1 else size))
 
     def readable(self):
-        return self._mode.reading
+        return self.mode.reading
 
     def read(self, size=-1):
-        if not self._mode.reading:
+        if not self.mode.reading:
             raise IOError("File is not in read mode")
         self.pos = self.pos + size if size != -1 else self.__length_hint__()
         return self.data.read(size)
@@ -123,10 +127,10 @@ class WebDAVFile(io.RawIOBase):
         return size or data_size
 
     def writable(self):
-        return self._mode.writing
+        return self.mode.writing
 
     def write(self, data):
-        if not self._mode.writing:
+        if not self.mode.writing:
             raise IOError("File is not in write mode")
         bytes_written = self.data.write(data)
         self.seek(bytes_written, Seek.current)
@@ -192,44 +196,46 @@ class WebDAVFS(FS):
 
         return info_dict
 
-    def isdir(self, path):
-        try:
-            return self.client.is_dir(path)
-        except we.RemoteResourceNotFound:
-            return False
+    def create(self, path, wipe=False):
+        with self._lock:
+            if not wipe and self.exists(path):
+                return False
+            with self.openbin(path, 'wb') as new_file:
+                new_file.truncate(0)
+            return True
 
     def exists(self, path):
-        return self.client.check(path)
+        _path = self.validatepath(path)
+        return self.client.check(_path)
 
     def getinfo(self, path, namespaces=None):
         _path = self.validatepath(path)
         namespaces = namespaces or ()
 
         if _path in '/':
-            return Info({
-                "basic":
-                {
+            info_dict = {
+                "basic": {
                     "name": "",
                     "is_dir": True
                 },
-                "details":
-                {
-                    "type": int(ResourceType.directory)
+                "details": {
+                    "type": ResourceType.directory
                 }
-            })
+            }
 
-        try:
-            info = self.client.info(path)
-            info_dict = self._create_info_dict(info)
-            if self.isdir(path):
-                info_dict['basic']['is_dir'] = True
-                info_dict['details']['type'] = ResourceType.directory
-            return Info(info_dict)
-        except we.RemoteResourceNotFound as exc:
-            raise errors.ResourceNotFound(path, exc=exc)
+        else:
+            try:
+                info = self.client.info(_path)
+                info_dict = self._create_info_dict(info)
+                if self.client.is_dir(_path):
+                    info_dict['basic']['is_dir'] = True
+                    info_dict['details']['type'] = ResourceType.directory
+            except we.RemoteResourceNotFound as exc:
+                raise errors.ResourceNotFound(path, exc=exc)
+
+        return Info(info_dict)
 
     def listdir(self, path):
-        self.check()
         _path = self.validatepath(path)
 
         if not self.getinfo(_path).is_dir:
@@ -239,10 +245,9 @@ class WebDAVFS(FS):
         return map(six.u, dir_list) if six.PY2 else dir_list
 
     def makedir(self, path, permissions=None, recreate=False):
-        self.validatepath(path)
-        _path = abspath(normpath(path))
+        _path = self.validatepath(path)
 
-        if _path == '/':
+        if _path in '/':
             if not recreate:
                 raise errors.DirectoryExists(path)
 
@@ -259,90 +264,77 @@ class WebDAVFS(FS):
     def openbin(self, path, mode='r', buffering=-1, **options):
         _mode = Mode(mode)
         _mode.validate_bin()
-        self.validatepath(path)
+        _path = self.validatepath(path)
 
         log.debug("openbin: %s, %s", path, mode)
         with self._lock:
             try:
-                info = self.getinfo(path)
+                info = self.getinfo(_path)
                 log.debug("Info: %s", info)
             except errors.ResourceNotFound:
-                if _mode.reading:
+                if not _mode.create:
                     raise errors.ResourceNotFound(path)
             else:
                 if info.is_dir:
                     raise errors.FileExpected(path)
             if _mode.exclusive:
                 raise errors.FileExists(path)
-        wdfile = WebDAVFile(self, abspath(normpath(path)), mode)
-        return wdfile
+        return WebDAVFile(self, _path, _mode)
 
     def remove(self, path):
-        if not self.exists(path):
-            raise errors.ResourceNotFound(path)
-
+        _path = self.validatepath(path)
         if self.getinfo(path).is_dir:
             raise errors.FileExpected(path)
-
-        self.client.clean(path)
+        self.client.clean(_path)
 
     def removedir(self, path):
-        if path == '/':
-            raise errors.RemoveRootError
-
-        if not self.exists(path):
-            raise errors.ResourceNotFound(path)
-
-        if not self.isdir(path):
+        _path = self.validatepath(path)
+        if path in '/':
+            raise errors.RemoveRootError()
+        if not self.getinfo(path).is_dir:
             raise errors.DirectoryExpected(path)
-
-        checklist = self.client.list(path)
-        if checklist:
+        if not self.isempty(_path):
             raise errors.DirectoryNotEmpty(path)
-
-        self.client.clean(path)
+        self.client.clean(_path)
 
     def setbytes(self, path, contents):
         if not isinstance(contents, bytes):
             raise ValueError('contents must be bytes')
-        _path = abspath(normpath(path))
-        self.validatepath(path)
+        _path = self.validatepath(path)
         bin_file = io.BytesIO(contents)
         with self._lock:
             resource = self._create_resource(_path)
             resource.read_from(bin_file)
 
     def setinfo(self, path, info):
-        if not self.exists(path):
+        _path = self.validatepath(path)
+        if not self.exists(_path):
             raise errors.ResourceNotFound(path)
 
-    def create(self, path, wipe=False):
-        with self._lock:
-            if not wipe and self.exists(path):
-                return False
-            with self.open(path, 'wb') as new_file:
-                # log.debug("CREATE %s", new_file)
-                new_file.truncate(0)
-            return True
-
     def copy(self, src_path, dst_path, overwrite=False):
+        _src_path = self.validatepath(src_path)
+        _dst_path = self.validatepath(dst_path)
+
         with self._lock:
-            if not overwrite and self.exists(dst_path):
+            if not overwrite and self.exists(_dst_path):
                 raise errors.DestinationExists(dst_path)
             try:
-                self.client.copy(src_path, dst_path)
-            except we.RemoteResourceNotFound:
-                raise errors.ResourceNotFound(src_path)
-            except we.RemoteParentNotFound:
-                raise errors.ResourceNotFound(dst_path)
+                self.client.copy(_src_path, _dst_path)
+            except we.RemoteResourceNotFound as exc:
+                raise errors.ResourceNotFound(src_path, exc=exc)
+            except we.RemoteParentNotFound as exc:
+                raise errors.ResourceNotFound(dst_path, exc=exc)
 
     def move(self, src_path, dst_path, overwrite=False):
-        if not overwrite and self.exists(dst_path):
+        _src_path = self.validatepath(src_path)
+        _dst_path = self.validatepath(dst_path)
+
+        if not overwrite and self.exists(_dst_path):
             raise errors.DestinationExists(dst_path)
         with self._lock:
             try:
-                self.client.move(src_path, dst_path, overwrite=overwrite)
-            except we.RemoteResourceNotFound:
-                raise errors.ResourceNotFound(src_path)
-            except we.RemoteParentNotFound:
-                raise errors.ResourceNotFound(dst_path)
+                self.client.move(_src_path, _dst_path, overwrite=overwrite)
+            except we.RemoteResourceNotFound as exc:
+                raise errors.ResourceNotFound(src_path, exc=exc)
+            except we.RemoteParentNotFound as exc:
+                raise errors.ResourceNotFound(dst_path, exc=exc)
