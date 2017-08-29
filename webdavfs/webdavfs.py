@@ -89,8 +89,7 @@ class WebDAVFile(io.RawIOBase):
     def read(self, size=-1):
         if not self._mode.reading:
             raise IOError("File is not in read mode")
-        if size != -1:
-            self.pos += size
+        self.pos = self.pos + size if size != -1 else self._get_data_size()
         return self.data.read(size)
 
     def seekable(self):
@@ -111,6 +110,7 @@ class WebDAVFile(io.RawIOBase):
             raise ValueError('invalid value for whence')
 
         self.data.seek(self.pos)
+        return self.pos
 
     def tell(self):
         return self.pos
@@ -223,8 +223,8 @@ class WebDAVFS(FS):
                 info_dict['basic']['is_dir'] = True
                 info_dict['details']['type'] = int(ResourceType.directory)
             return Info(info_dict)
-        except we.RemoteResourceNotFound:
-            raise errors.ResourceNotFound(path)
+        except we.RemoteResourceNotFound as exc:
+            raise errors.ResourceNotFound(path, exc=exc)
 
     def listdir(self, path):
         self.check()
