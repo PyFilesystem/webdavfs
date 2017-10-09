@@ -51,9 +51,11 @@ class TestExistDB30(_TestDocker, unittest.TestCase):
     server_image = 'zopyx/existdb-30'
     webdav_url = 'webdav://admin:admin@localhost:10080/exist/webdav/db'
 
+
 class TestExistDB22(_TestDocker, unittest.TestCase):
     server_image = 'zopyx/existdb-22'
     webdav_url = 'webdav://admin:admin@localhost:10080/exist/webdav/db'
+
 
 class TestBaseX86(_TestDocker, unittest.TestCase):
     server_image = 'zopyx/basex-86'
