@@ -3,6 +3,7 @@
 import io
 import six
 import threading
+import operator
 import logging
 
 import webdav2.client as wc
@@ -238,7 +239,10 @@ class WebDAVFS(FS):
             raise errors.DirectoryExpected(path)
 
         dir_list = self.client.list(_path)
-        return map(six.u, dir_list) if six.PY2 else dir_list
+        if six.PY2:
+            dir_list = map(operator.methodcaller('decode'), dir_list)
+
+        return list(map(operator.methodcaller('rstrip', '/'), dir_list))
 
     def makedir(self, path, permissions=None, recreate=False):
         _path = self.validatepath(path)
@@ -312,6 +316,8 @@ class WebDAVFS(FS):
         _dst_path = self.validatepath(dst_path)
 
         with self._lock:
+            if not self.getinfo(_src_path).is_file:
+                raise errors.FileExpected(src_path)
             if not overwrite and self.exists(_dst_path):
                 raise errors.DestinationExists(dst_path)
             try:
@@ -325,6 +331,8 @@ class WebDAVFS(FS):
         _src_path = self.validatepath(src_path)
         _dst_path = self.validatepath(dst_path)
 
+        if not self.getinfo(_src_path).is_file:
+            raise errors.FileExpected(src_path)
         if not overwrite and self.exists(_dst_path):
             raise errors.DestinationExists(dst_path)
         with self._lock:
