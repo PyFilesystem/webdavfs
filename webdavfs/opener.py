@@ -8,12 +8,12 @@ from fs.opener.base import Opener
 
 __author__ = "Martin Larralde <althonosdev@gmail.com>"
 
+
 class WebDAVOpener(Opener):
     protocols = ['webdav']
 
     def open_fs(self, fs_url, parse_result, writeable, create, cwd):
         from .webdavfs import WebDAVFS
-        from fs.subfs import ClosingSubFS
 
         webdav_host, _, dir_path = parse_result.resource.partition('/')
         webdav_host, _, webdav_port = webdav_host.partition(':')
