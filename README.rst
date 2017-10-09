@@ -28,9 +28,8 @@ or use the public constructor of the ``WebDAVFS`` class:
 
     >>> from webdavfs.webdavfs import WebDAVFS
     >>> url = 'http://zopyx.com:22082'
-    >>> creds = dict(login='admin', password='admin')
     >>> root = '/exist/webdav/db'
-    >>> handle = WebDAVFS(url, cred, root)
+    >>> handle = WebDAVFS(url, login='admin', password='admin', root)
     >>> handle.makedir('foo')
     >>> print(handle.listdir('.'))
     ....
