@@ -10,8 +10,8 @@ from .base import _TestWebDAVFS
 
 
 @unittest.skipUnless(
-        os.getenv('WEBDAVFS_USE_SERVERS', 'false').lower() == 'true',
-        'Set WEBDAVFS_USE_SERVERS to True to enable tests against real servers')
+    os.getenv('WEBDAVFS_USE_SERVERS', 'false').lower() == 'true',
+    'Set WEBDAVFS_USE_SERVERS to True to enable tests against real servers')
 class _TestServer(_TestWebDAVFS):
     """Test WebDAVFS implementation using actual servers."""
 
