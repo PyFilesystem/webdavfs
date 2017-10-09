@@ -21,8 +21,7 @@ class WebDAVOpener(Opener):
 
         return WebDAVFS(
             url='http://{}:{}'.format(webdav_host, webdav_port),
-            login: parse_result.username,
-            password: parse_result.password
-            },
+            login=parse_result.username,
+            password=parse_result.password
             root=dir_path,
         )
