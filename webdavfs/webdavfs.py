@@ -147,16 +147,15 @@ class WebDAVFS(FS):
         'virtual': False,
     }
 
-    def __init__(self, url, credentials=None, root=None):
+    def __init__(self, url, login=None, password=None, root=None):
         self.url = url
-        self.credentials = credentials
         self.root = root
         super(WebDAVFS, self).__init__()
 
         options = {
             'webdav_hostname': self.url,
-            'webdav_login': self.credentials["login"],
-            'webdav_password': self.credentials["password"],
+            'webdav_login': login,
+            'webdav_password': password,
             'root': self.root
         }
         self.client = wc.Client(options)
