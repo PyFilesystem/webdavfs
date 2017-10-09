@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import io
-import os
 import six
 import threading
 import logging
@@ -16,7 +15,6 @@ from fs.enums import ResourceType, Seek
 from fs.info import Info
 from fs.iotools import line_iterator
 from fs.mode import Mode
-from fs.path import abspath, normpath
 
 
 log = logging.getLogger(__name__)
@@ -85,7 +83,7 @@ class WebDAVFile(io.RawIOBase):
             self.res.read_from(self.data)
 
     def readline(self, size=-1):
-        return next(line_iterator(self, None if size==-1 else size))
+        return next(line_iterator(self, None if size == -1 else size))
 
     def readable(self):
         return self.mode.reading
@@ -135,7 +133,6 @@ class WebDAVFile(io.RawIOBase):
         bytes_written = self.data.write(data)
         self.seek(bytes_written, Seek.current)
         return bytes_written
-
 
 
 class WebDAVFS(FS):
