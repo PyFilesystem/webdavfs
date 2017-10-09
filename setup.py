@@ -24,9 +24,8 @@ with io.open('HISTORY.rst', 'r', encoding='utf8') as f:
     HISTORY = f.read()
 
 REQUIREMENTS = [
-    "fs>=2.0.0",
+    "fs~=2.0.7",
     "webdavclient2",
-    "furl"
 ]
 
 setup(
@@ -34,15 +33,18 @@ setup(
     author_email="info@zopyx.com",
     classifiers=CLASSIFIERS,
     description="WebDAV support for pyfilesystem2",
+    entry_points={
+        'fs.opener': 'webdav = webdavfs.opener:WebDAVOpener'
+    },
     install_requires=REQUIREMENTS,
     license="BSD",
     long_description=DESCRIPTION + "\n" + HISTORY,
     name='fs.webdavfs',
     packages=find_packages(exclude=("tests",)),
     platforms=['any'],
-    test_suite="nose.collector",
+    setup_requires=['nose'],
+    tests_require=['docker'],
+    test_suite='webdavfs.tests',
     url="http://pypi.python.org/pypi/fs.webdavfs/",
     version="0.2.1"
 )
-
-

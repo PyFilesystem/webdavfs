@@ -15,15 +15,24 @@ Supported Python versions
 Usage
 -----
 
+Use the ``fs.open_fs`` method with the ``webdav://`` protocol:
+
 .. code:: python
 
-    > from webdavfs.webdavfs import WebDAVFS
-    > url = 'http://zopyx.com:22082'
-    > creds = dict(login='admin', password='admin')
-    > root = '/exist/webdav/db'
-    > handle = WebDAVFS(url, cred, root)
-    > handle.makedir('foo')
-    > print(handle.listdir('.'))
+    >>> import fs
+    >>> handle = fs.open_fs('webdav://admin:admin@zopyx.com:22082/exist/webdav/db')
+
+or use the public constructor of the ``WebDAVFS`` class:
+
+.. code:: python
+
+    >>> from webdavfs.webdavfs import WebDAVFS
+    >>> url = 'http://zopyx.com:22082'
+    >>> creds = dict(login='admin', password='admin')
+    >>> root = '/exist/webdav/db'
+    >>> handle = WebDAVFS(url, cred, root)
+    >>> handle.makedir('foo')
+    >>> print(handle.listdir('.'))
     ....
 
 Repository
@@ -47,6 +56,7 @@ Author and contributors
 - Yuriy Homyakov
 - Semyon Gaivoronskiy
 - Andreas Jung
+- `Martin Larralde <https://github.com/althonos>`_
 
 
 License
