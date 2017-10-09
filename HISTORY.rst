@@ -1,6 +1,13 @@
 Release notes
 =============
 
+0.3.0 (unreleased)
+------------------
+- merged https://github.com/PyFilesystem/webdavfs/pull/3
+  [althonos]
+- WebDAVFS constructor uses `login` and `password` parameter
+  instead of `credentials` dict
+
 0.2.0 (2017/05/04)
 ------------------
 - new testing infrastructure on Travis using Docker images for
