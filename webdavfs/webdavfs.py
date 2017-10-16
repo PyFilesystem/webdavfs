@@ -3,6 +3,7 @@
 import io
 import six
 import threading
+import operator
 import logging
 
 import webdav2.client as wc
@@ -166,7 +167,7 @@ class WebDAVFS(FS):
         return res
 
     def get_resource(self, path):
-        return self._create_resource(path)
+        return self._create_resource(path.encode('utf-8'))
 
     @staticmethod
     def _create_info_dict(info):
@@ -176,19 +177,26 @@ class WebDAVFS(FS):
             'access': {}
         }
 
+        if six.PY2:
+            def decode(s):
+                return s.decode('utf-8') if isinstance(s, bytes) else s
+        else:
+            def decode(s):
+                return s
+
         for key, val in six.iteritems(info):
             if key in basics:
-                info_dict['basic'][key] = six.u(val)
+                info_dict['basic'][key] = decode(val)
             elif key in details:
                 if key == 'size' and val:
                     val = int(val)
                 elif val:
-                    val = six.u(val)
-                info_dict['details'][key] = val
+                    val = decode(val)
+                info_dict['details'][key] = decode(val)
             elif key in access:
-                info_dict['access'][key] = six.u(val)
+                info_dict['access'][key] = decode(val)
             else:
-                info_dict['other'][key] = six.u(val)
+                info_dict['other'][key] = decode(val)
 
         return info_dict
 
@@ -202,7 +210,7 @@ class WebDAVFS(FS):
 
     def exists(self, path):
         _path = self.validatepath(path)
-        return self.client.check(_path)
+        return self.client.check(_path.encode('utf-8'))
 
     def getinfo(self, path, namespaces=None):
         _path = self.validatepath(path)
@@ -221,9 +229,9 @@ class WebDAVFS(FS):
 
         else:
             try:
-                info = self.client.info(_path)
+                info = self.client.info(_path.encode('utf-8'))
                 info_dict = self._create_info_dict(info)
-                if self.client.is_dir(_path):
+                if self.client.is_dir(_path.encode('utf-8')):
                     info_dict['basic']['is_dir'] = True
                     info_dict['details']['type'] = ResourceType.directory
             except we.RemoteResourceNotFound as exc:
@@ -237,8 +245,11 @@ class WebDAVFS(FS):
         if not self.getinfo(_path).is_dir:
             raise errors.DirectoryExpected(path)
 
-        dir_list = self.client.list(_path)
-        return map(six.u, dir_list) if six.PY2 else dir_list
+        dir_list = self.client.list(_path.encode('utf-8'))
+        if six.PY2:
+            dir_list = map(operator.methodcaller('decode', 'utf-8'), dir_list)
+
+        return list(map(operator.methodcaller('rstrip', '/'), dir_list))
 
     def makedir(self, path, permissions=None, recreate=False):
         _path = self.validatepath(path)
@@ -251,7 +262,7 @@ class WebDAVFS(FS):
             if self.exists(_path):
                 raise errors.DirectoryExists(path)
             try:
-                self.client.mkdir(_path)
+                self.client.mkdir(_path.encode('utf-8'))
             except we.RemoteParentNotFound as exc:
                 raise errors.ResourceNotFound(path, exc=exc)
 
@@ -281,7 +292,7 @@ class WebDAVFS(FS):
         _path = self.validatepath(path)
         if self.getinfo(path).is_dir:
             raise errors.FileExpected(path)
-        self.client.clean(_path)
+        self.client.clean(_path.encode('utf-8'))
 
     def removedir(self, path):
         _path = self.validatepath(path)
@@ -291,7 +302,7 @@ class WebDAVFS(FS):
             raise errors.DirectoryExpected(path)
         if not self.isempty(_path):
             raise errors.DirectoryNotEmpty(path)
-        self.client.clean(_path)
+        self.client.clean(_path.encode('utf-8'))
 
     def setbytes(self, path, contents):
         if not isinstance(contents, bytes):
@@ -299,7 +310,7 @@ class WebDAVFS(FS):
         _path = self.validatepath(path)
         bin_file = io.BytesIO(contents)
         with self._lock:
-            resource = self._create_resource(_path)
+            resource = self._create_resource(_path.encode('utf-8'))
             resource.read_from(bin_file)
 
     def setinfo(self, path, info):
@@ -312,10 +323,12 @@ class WebDAVFS(FS):
         _dst_path = self.validatepath(dst_path)
 
         with self._lock:
+            if not self.getinfo(_src_path).is_file:
+                raise errors.FileExpected(src_path)
             if not overwrite and self.exists(_dst_path):
                 raise errors.DestinationExists(dst_path)
             try:
-                self.client.copy(_src_path, _dst_path)
+                self.client.copy(_src_path.encode('utf-8'), _dst_path.encode('utf-8'))
             except we.RemoteResourceNotFound as exc:
                 raise errors.ResourceNotFound(src_path, exc=exc)
             except we.RemoteParentNotFound as exc:
@@ -325,11 +338,13 @@ class WebDAVFS(FS):
         _src_path = self.validatepath(src_path)
         _dst_path = self.validatepath(dst_path)
 
+        if not self.getinfo(_src_path).is_file:
+            raise errors.FileExpected(src_path)
         if not overwrite and self.exists(_dst_path):
             raise errors.DestinationExists(dst_path)
         with self._lock:
             try:
-                self.client.move(_src_path, _dst_path, overwrite=overwrite)
+                self.client.move(_src_path.encode('utf-8'), _dst_path.encode('utf-8'), overwrite=overwrite)
             except we.RemoteResourceNotFound as exc:
                 raise errors.ResourceNotFound(src_path, exc=exc)
             except we.RemoteParentNotFound as exc:
