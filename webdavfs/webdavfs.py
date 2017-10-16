@@ -306,7 +306,7 @@ class WebDAVFS(FS):
 
     def setbytes(self, path, contents):
         if not isinstance(contents, bytes):
-            raise ValueError('contents must be bytes')
+            raise TypeError('contents must be bytes')
         _path = self.validatepath(path)
         bin_file = io.BytesIO(contents)
         with self._lock:
