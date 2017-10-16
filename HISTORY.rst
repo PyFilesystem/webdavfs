@@ -1,7 +1,7 @@
 Release notes
 =============
 
-0.3.0 (unreleased)
+0.3.0 (2017/10/16)
 ------------------
 - merged https://github.com/PyFilesystem/webdavfs/pull/3
   [althonos]
