@@ -37,7 +37,7 @@ setup(
         'fs.opener': 'webdav = webdavfs.opener:WebDAVOpener'
     },
     install_requires=REQUIREMENTS,
-    license="BSD",
+    license="MIT",
     long_description=DESCRIPTION + "\n" + HISTORY,
     name='fs.webdavfs',
     packages=find_packages(exclude=("tests",)),
@@ -46,5 +46,5 @@ setup(
     tests_require=['docker'],
     test_suite='webdavfs.tests',
     url="http://pypi.python.org/pypi/fs.webdavfs/",
-    version="0.3.0"
+    version="0.3.1"
 )

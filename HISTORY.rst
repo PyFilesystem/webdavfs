@@ -1,6 +1,10 @@
 Release notes
 =============
 
+0.3.1 (2017/10/19)
+------------------
+- fixed LICENSE file (MIT)
+
 0.3.0 (2017/10/16)
 ------------------
 - merged https://github.com/PyFilesystem/webdavfs/pull/3
