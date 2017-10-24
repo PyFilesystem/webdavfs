@@ -61,7 +61,7 @@ Author and contributors
 License
 -------
 
-This module is published under the BSD license.
+This module is published under the MIT license.
 
 This module was sponsored and financed by Andreas Jung/ZOPYX
 
