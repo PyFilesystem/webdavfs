@@ -2,6 +2,9 @@
 
 import io
 import six
+import datetime
+import dateutil.parser
+import dateutil.tz
 import threading
 import operator
 import logging
@@ -24,6 +27,10 @@ basics = frozenset(['name'])
 details = frozenset(('type', 'accessed', 'modified', 'created',
                      'metadata_changed', 'size'))
 access = frozenset(('permissions', 'user', 'uid', 'group', 'gid'))
+
+
+utc = dateutil.tz.tzutc()
+epoch = datetime.datetime(1970, 1, 1, tzinfo=utc)
 
 
 class WebDAVFile(io.RawIOBase):
@@ -184,6 +191,10 @@ class WebDAVFS(FS):
             def decode(s):
                 return s
 
+        def decode_datestring(s):
+            dt = dateutil.parser.parse(s)
+            return (dt - epoch).total_seconds()
+
         for key, val in six.iteritems(info):
             if key in basics:
                 info_dict['basic'][key] = decode(val)
@@ -191,6 +202,8 @@ class WebDAVFS(FS):
                 if key == 'size' and val:
                     val = int(val)
                 elif val:
+                    if key in ('modified', 'created'):
+                        val = decode_datestring(val)
                     val = decode(val)
                 info_dict['details'][key] = decode(val)
             elif key in access:

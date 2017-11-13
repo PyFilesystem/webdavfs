@@ -1,6 +1,12 @@
 Release notes
 =============
 
+0.3.2 (2017/11/13)
+------------------
+- details/modified + details/created are correctly converted according
+  to the PyFilesystem2 docs to datetime
+  [ajung]
+
 0.3.1 (2017/10/19)
 ------------------
 - fixed LICENSE file (MIT)
