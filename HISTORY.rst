@@ -1,6 +1,11 @@
 Release notes
 =============
 
+0.3.3 (2017/12/29)
+------------------
+ - fixed issue with hardcoded http  method in opener.py
+  [ajung]
+
 0.3.2 (2017/11/13)
 ------------------
 - details/modified + details/created are correctly converted according
