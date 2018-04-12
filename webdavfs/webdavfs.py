@@ -19,6 +19,7 @@ from fs.enums import ResourceType, Seek
 from fs.info import Info
 from fs.iotools import line_iterator
 from fs.mode import Mode
+from fs.path import dirname
 
 
 log = logging.getLogger(__name__)
@@ -294,6 +295,9 @@ class WebDAVFS(FS):
             except errors.ResourceNotFound:
                 if not _mode.create:
                     raise errors.ResourceNotFound(path)
+                # Check the parent is an existing directory
+                if self.gettype(dirname(_path)) is not ResourceType.directory:
+                    raise errors.DirectoryExpected(dirname(path))
             else:
                 if info.is_dir:
                     raise errors.FileExpected(path)
