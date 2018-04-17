@@ -5,12 +5,12 @@ Release notes
 ------------------
  - merged PR #14 (`openbin` not raising `ResourceNotFound` on 
    missing parent)
-  [ajung, althonos]
+   [ajung, althonos]
 
 0.3.3 (2017/12/29)
 ------------------
  - fixed issue with hardcoded http  method in opener.py
-  [ajung]
+   [ajung]
 
 0.3.2 (2017/11/13)
 ------------------
