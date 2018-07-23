@@ -8,7 +8,6 @@ Supported Python versions
 -------------------------
 
 - Python 2.7
-- Python 3.4
 - Python 3.5
 - Python 3.6
 
