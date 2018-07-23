@@ -6,19 +6,25 @@ cache: pip
 services:
   - docker
 
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "3.6"
+matrix:
+  include:
+  - python: "2.7"
+    env: SETUPTOOLS=setuptools
+  - python: "3.3"
+    env: SETUPTOOLS=setuptools~=39.2
+  - python: "3.4"
+    env: SETUPTOOLS=setuptools
+  - python: "3.5"
+    env: SETUPTOOLS=setuptools
+  - python: "3.6"
+    env: SETUPTOOLS=setuptools
 
 before_install:
   # Pull docker images early for a more responsive nosetests run
   - echo zopyx/basex-86 zopyx/existdb-22 zopyx/existdb-30 | xargs -n1 docker pull
 
 install:
-  - pip install -U pip setuptools wheel
+  - pip install -U pip $SETUPTOOLS wheel
   - pip install .
 
 script:
