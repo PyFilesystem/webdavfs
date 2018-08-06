@@ -1,11 +1,17 @@
 Release notes
 =============
 
+0.3.5 (2018/08/06)
+------------------
+- fixed return type of getinfo() dates due to strong
+  checks in fs > 2.0.27
+
 0.3.4 (2018/04/16)
 ------------------
 - merged PR #14 (`openbin` not raising `ResourceNotFound` on 
   missing parent)
   [ajung, althonos]
+
 
 0.3.3 (2017/12/29)
 ------------------

@@ -203,10 +203,9 @@ class WebDAVFS(FS):
                 if key == 'size' and val:
                     val = int(val)
                 elif val:
-                    if key in ('modified', 'created'):
+                    if key in ('modified', 'created', 'accessed'):
                         val = decode_datestring(val)
-                    val = decode(val)
-                info_dict['details'][key] = decode(val)
+                info_dict['details'][key] = decode(val) or None
             elif key in access:
                 info_dict['access'][key] = decode(val)
             else:
