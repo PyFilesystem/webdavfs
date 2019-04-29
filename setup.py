@@ -34,7 +34,10 @@ setup(
     classifiers=CLASSIFIERS,
     description="WebDAV support for pyfilesystem2",
     entry_points={
-        'fs.opener': 'webdav = webdavfs.opener:WebDAVOpener'
+        'fs.opener': [
+            'webdav = webdavfs.opener:WebDAVOpener',
+            'webdavs = webdavfs.opener:WebDAVOpener'
+            ]
     },
     install_requires=REQUIREMENTS,
     license="MIT",
