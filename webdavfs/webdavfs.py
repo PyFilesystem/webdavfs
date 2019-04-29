@@ -303,8 +303,8 @@ class WebDAVFS(FS):
             else:
                 if info.is_dir:
                     raise errors.FileExpected(path)
-            if _mode.exclusive:
-                raise errors.FileExists(path)
+                if _mode.exclusive:
+                    raise errors.FileExists(path)
         return WebDAVFile(self, _path, _mode)
 
     def remove(self, path):
