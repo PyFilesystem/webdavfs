@@ -23,7 +23,7 @@ with io.open('HISTORY.rst', 'r', encoding='utf8') as f:
     HISTORY = f.read()
 
 REQUIREMENTS = [
-    "fs~=2.0.7",
+    "fs>2.0",
     "webdavclient2",
     "python-dateutil"
 ]
@@ -34,7 +34,10 @@ setup(
     classifiers=CLASSIFIERS,
     description="WebDAV support for pyfilesystem2",
     entry_points={
-        'fs.opener': 'webdav = webdavfs.opener:WebDAVOpener'
+        'fs.opener': [
+            'webdav = webdavfs.opener:WebDAVOpener',
+            'webdavs = webdavfs.opener:WebDAVOpener'
+            ]
     },
     install_requires=REQUIREMENTS,
     license="MIT",
@@ -46,5 +49,5 @@ setup(
     tests_require=['docker'],
     test_suite='webdavfs.tests',
     url="http://pypi.python.org/pypi/fs.webdavfs/",
-    version="0.3.5.1"
+    version="0.3.7"
 )

@@ -1,6 +1,17 @@
 Release notes
 =============
 
+0.3.7 (2019/04/29)
+------------------
+- fixed testsuite
+  [ajung]
+
+0.3.6 (2019/04/29)
+------------------
+- support for webdavs:// opener protocol
+  [ajung]
+
+
 0.3.5 (2018/08/06)
 ------------------
 - fixed return type of getinfo() dates due to strong

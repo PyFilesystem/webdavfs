@@ -10,6 +10,8 @@ Supported Python versions
 - Python 2.7
 - Python 3.5
 - Python 3.6
+- Python 3.7
+
 
 Usage
 -----
@@ -32,6 +34,19 @@ or use the public constructor of the ``WebDAVFS`` class:
     >>> handle.makedir('foo')
     >>> print(handle.listdir('.'))
     ....
+
+For WebDAV over HTTPS you can use either `webdav://` with port 443 
+
+.. code:: python
+
+    >>> handle = fs.open_fs('webdav://admin:admin@zopyx.com:443/exist/webdav/db')
+
+or `webdavs://`: 
+
+.. code:: python
+
+    >>> handle = fs.open_fs('webdavs://admin:admin@zopyx.com/exist/webdav/db')
+
 
 Repository
 ----------

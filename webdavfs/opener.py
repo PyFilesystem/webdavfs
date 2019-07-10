@@ -10,7 +10,7 @@ __author__ = "Martin Larralde <althonosdev@gmail.com>"
 
 
 class WebDAVOpener(Opener):
-    protocols = ['webdav']
+    protocols = ['webdav', 'webdavs']
 
     def open_fs(self, fs_url, parse_result, writeable, create, cwd):
         from .webdavfs import WebDAVFS
@@ -18,7 +18,10 @@ class WebDAVOpener(Opener):
         webdav_host, _, dir_path = parse_result.resource.partition('/')
         webdav_host, _, webdav_port = webdav_host.partition(':')
         webdav_port = int(webdav_port) if webdav_port.isdigit() else 80
-        webdav_scheme = 'http' if webdav_port != 443 else 'https'
+        if parse_result.protocol == 'webdav':
+            webdav_scheme = 'http' if webdav_port != 443 else 'https'
+        else:
+            webdav_scheme = 'https'
 
         return WebDAVFS(
             url='{}://{}:{}'.format(webdav_scheme, webdav_host, webdav_port),
