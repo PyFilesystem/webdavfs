@@ -9,9 +9,9 @@ import threading
 import operator
 import logging
 
-import webdav2.client as wc
-import webdav2.exceptions as we
-import webdav2.urn as wu
+import webdav3.client as wc
+import webdav3.exceptions as we
+import webdav3.urn as wu
 
 from fs import errors
 from fs.base import FS
@@ -208,7 +208,7 @@ class WebDAVFS(FS):
                 if key in ('modified', 'created', 'accessed'):
                     info_dict['details'][key] = decode(val) or None
                 else:
-                    info_dict['details'][key] = decode(val) 
+                    info_dict['details'][key] = decode(val)
             elif key in access:
                 info_dict['access'][key] = decode(val)
             else:
