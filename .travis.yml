@@ -23,6 +23,9 @@ matrix:
     - os: linux
       dist: xenial
       python: 3.8
+    - os: linux
+      dist: xenial
+      python: 3.9-dev
 
 
 before_install:
