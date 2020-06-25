@@ -17,11 +17,12 @@ class WebDAVOpener(Opener):
 
         webdav_host, _, dir_path = parse_result.resource.partition('/')
         webdav_host, _, webdav_port = webdav_host.partition(':')
-        webdav_port = int(webdav_port) if webdav_port.isdigit() else 80
         if parse_result.protocol == 'webdav':
-            webdav_scheme = 'http' if webdav_port != 443 else 'https'
+            webdav_scheme = 'http'
+            webdav_port = 80
         else:
             webdav_scheme = 'https'
+            webdav_port = 443
 
         return WebDAVFS(
             url='{}://{}:{}'.format(webdav_scheme, webdav_host, webdav_port),

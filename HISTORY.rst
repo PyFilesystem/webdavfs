@@ -1,6 +1,11 @@
 Release notes
 =============
 
+0.3.8 (2020/06/25)
+------------------
+- fixed port handling for webdavs:// in opener
+  [ajung]
+
 0.3.7 (2019/04/29)
 ------------------
 - fixed testsuite
