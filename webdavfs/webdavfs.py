@@ -246,6 +246,9 @@ class WebDAVFS(FS):
         else:
             try:
                 info = self.client.info(_path.encode('utf-8'))
+                # displayname is optional
+                if info['name'] is None:
+                    info['name'] = _path.split("/")[-1]
                 info_dict = self._create_info_dict(info)
                 if self.client.is_dir(_path.encode('utf-8')):
                     info_dict['basic']['is_dir'] = True
