@@ -19,10 +19,15 @@ class WebDAVOpener(Opener):
         webdav_host, _, webdav_port = webdav_host.partition(':')
         if parse_result.protocol == 'webdav':
             webdav_scheme = 'http'
-            webdav_port = 80
+            default_webdav_port = 80
         else:
             webdav_scheme = 'https'
-            webdav_port = 443
+            default_webdav_port = 443
+
+        if webdav_port == "":
+            webdav_port = default_webdav_port
+        else:
+            webdav_port = int(webdav_port)
 
         return WebDAVFS(
             url='{}://{}:{}'.format(webdav_scheme, webdav_host, webdav_port),

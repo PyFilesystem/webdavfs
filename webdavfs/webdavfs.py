@@ -9,9 +9,9 @@ import threading
 import operator
 import logging
 
-import webdav2.client as wc
-import webdav2.exceptions as we
-import webdav2.urn as wu
+import webdav3.client as wc
+import webdav3.exceptions as we
+import webdav3.urn as wu
 
 from fs import errors
 from fs.base import FS
@@ -250,6 +250,9 @@ class WebDAVFS(FS):
         else:
             try:
                 info = self.client.info(_path.encode('utf-8'))
+                # displayname is optional
+                if info['name'] is None:
+                    info['name'] = _path.split("/")[-1]
                 info_dict = self._create_info_dict(info)
                 if self.client.is_dir(_path.encode('utf-8')):
                     info_dict['basic']['is_dir'] = True
