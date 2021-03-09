@@ -49,5 +49,5 @@ setup(
     tests_require=['docker'],
     test_suite='webdavfs.tests',
     url="http://pypi.python.org/pypi/fs.webdavfs/",
-    version="0.4.0"
+    version="0.4.1"
 )

@@ -1,6 +1,10 @@
 Release notes
 =============
 
+0.4.1 (2021/03/09)
+------------------
+- fixes merge conflict
+
 0.4.0 (2021/03/09)
 ------------------
 - fixes situation where there is no display name 
@@ -8,8 +12,6 @@ Release notes
 - use webdavclient3
   [joequant]
 - fix non-standard ports for webdav
-  [joequant]
-- added caching support
   [joequant]
 
 0.3.8 (2020/06/25)
