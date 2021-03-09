@@ -20,6 +20,7 @@ from fs.info import Info
 from fs.iotools import line_iterator
 from fs.mode import Mode
 from fs.path import dirname
+from cachetools import TTLCache
 
 
 log = logging.getLogger(__name__)
@@ -156,7 +157,8 @@ class WebDAVFS(FS):
         'virtual': False,
     }
 
-    def __init__(self, url, login=None, password=None, root=None):
+    def __init__(self, url, login=None, password=None, root=None,
+                 cache_maxsize=10000, cache_ttl=60):
         self.url = url
         self.root = root
         super(WebDAVFS, self).__init__()
@@ -167,6 +169,8 @@ class WebDAVFS(FS):
             'webdav_password': password,
             'root': self.root
         }
+        self.info_cache = TTLCache(maxsize=cache_maxsize,
+                                   ttl=cache_ttl)
         self.client = wc.Client(options)
 
     def _create_resource(self, path):
@@ -182,7 +186,8 @@ class WebDAVFS(FS):
         info_dict = {
             'basic': {"is_dir": False},
             'details': {'type': int(ResourceType.file)},
-            'access': {}
+            'access': {},
+	    'other': {}
         }
 
         if six.PY2:
@@ -230,9 +235,8 @@ class WebDAVFS(FS):
 
     def getinfo(self, path, namespaces=None):
         _path = self.validatepath(path)
-        namespaces = namespaces or ()
-
         if _path in '/':
+<<<<<<< Updated upstream
             info_dict = {
                 "basic": {
                     "name": "",
@@ -257,18 +261,51 @@ class WebDAVFS(FS):
                 raise errors.ResourceNotFound(path, exc=exc)
 
         return Info(info_dict)
+=======
+            self.info_cache.clear()
+        try:
+            _path = self.validatepath(path)
+            namespaces = namespaces or ()
+            urn =wu.Urn(_path.encode('utf-8'))
+            path = self.client.get_full_path(urn);
+            if path in self.info_cache:
+                info = self.info_cache[path]
+                response = None
+            else:
+                response = self.client.execute_request(action='info',
+                                                       path=urn.quote())
+                info = wc.WebDavXmlUtils.parse_info_response(content=response.content, path=path, hostname=self.client.webdav.hostname)
+                if info['name'] is None:
+                    info['name'] = _path.split("/")[-1]
+                if wc.WebDavXmlUtils.parse_is_dir_response(content=response.content, path=path, hostname=self.client.webdav.hostname):
+                    info['isdir'] = True
+                    info['files'] = []
+                    for i in wc.WebDavXmlUtils.parse_get_list_info_response(response.content):
+                        if i['path'].rstrip('/') != path.rstrip('/'):
+                            self.info_cache[i['path']] = i
+                            filename = wu.Urn(i['path'], i['isdir']).filename()
+                            if six.PY2:
+                                filename = filename.decode('utf-8')
+                            filename = filename.rstrip('/')
+                            info['files'].append(filename)
+                self.info_cache[path] = info
+            info_dict = self._create_info_dict(info)
+            if info.get('isdir', False):
+                info_dict['basic']['is_dir'] = True
+                info_dict['details']['type'] = ResourceType.directory
+        except we.RemoteResourceNotFound as exc:
+            raise errors.ResourceNotFound(path, exc=exc)
+        retval = Info(info_dict)
+        return retval
+>>>>>>> Stashed changes
 
     def listdir(self, path):
-        _path = self.validatepath(path)
-
-        if not self.getinfo(_path).is_dir:
+        info = self.getinfo(path)
+        if not info.is_dir:
             raise errors.DirectoryExpected(path)
-
-        dir_list = self.client.list(_path.encode('utf-8'))
-        if six.PY2:
-            dir_list = map(operator.methodcaller('decode', 'utf-8'), dir_list)
-
-        return list(map(operator.methodcaller('rstrip', '/'), dir_list))
+        for i in info.raw['other']['files']:
+            yield i
+        return
 
     def makedir(self, path, permissions=None, recreate=False):
         _path = self.validatepath(path)
