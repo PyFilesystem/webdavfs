@@ -1,6 +1,12 @@
 Release notes
 =============
 
+0.4.2 (2021/03/10)
+------------------
+- added caching support
+  [joequant]
+
+
 0.4.1 (2021/03/09)
 ------------------
 - fixes merge conflict
