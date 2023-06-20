@@ -1,6 +1,8 @@
 # coding: utf-8
 
 import io
+import os
+import tempfile
 import six
 import datetime
 import dateutil.parser
@@ -56,9 +58,16 @@ class WebDAVFile(io.RawIOBase):
         if self.mode.reading:
             self.read(0)
 
+    def _init_file_data(self):
+        if self.fs.use_temp_files:
+            if self.fs.temp_path and not os.path.exists(self.fs.temp_path):
+                raise ValueError(f"Specified temp_path '{self.fs.temp_path}' does not exist.")
+            return tempfile.NamedTemporaryFile(dir=self.fs.temp_path)
+        return io.BytesIO()
+
     def _get_file_data(self):
         with self._lock:
-            data = io.BytesIO()
+            data = self._init_file_data()
             try:
                 self.res.write_to(data)
                 if not self.mode.appending:
@@ -154,9 +163,12 @@ class WebDAVFS(FS):
     }
 
     def __init__(self, url, login=None, password=None, root=None, timeout=None,
-                 cache_maxsize=10000, cache_ttl=60):
+                 cache_maxsize=10000, cache_ttl=60,
+                 use_temp_files=False, temp_path=None):
         self.url = url
         self.root = root
+        self.use_temp_files = use_temp_files
+        self.temp_path = temp_path
         super(WebDAVFS, self).__init__()
 
         options = {
