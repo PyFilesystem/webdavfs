@@ -6,7 +6,6 @@ import datetime
 import dateutil.parser
 import dateutil.tz
 import threading
-import operator
 import logging
 
 import webdav3.client as wc
