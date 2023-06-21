@@ -157,7 +157,7 @@ class WebDAVFS(FS):
         'virtual': False,
     }
 
-    def __init__(self, url, login=None, password=None, root=None,
+    def __init__(self, url, login=None, password=None, root=None, timeout=None,
                  cache_maxsize=10000, cache_ttl=60):
         self.url = url
         self.root = root
@@ -167,6 +167,7 @@ class WebDAVFS(FS):
             'webdav_hostname': self.url,
             'webdav_login': login,
             'webdav_password': password,
+            'webdav_timeout': timeout,
             'root': self.root
         }
         self.info_cache = TTLCache(maxsize=cache_maxsize,
