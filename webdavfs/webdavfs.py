@@ -1,12 +1,13 @@
 # coding: utf-8
 
 import io
+import os
+import tempfile
 import six
 import datetime
 import dateutil.parser
 import dateutil.tz
 import threading
-import operator
 import logging
 
 import webdav3.client as wc
@@ -37,13 +38,14 @@ epoch = datetime.datetime(1970, 1, 1, tzinfo=utc)
 
 class WebDAVFile(io.RawIOBase):
 
-    def __init__(self, wdfs, path, mode):
+    def __init__(self, wdfs, path, mode, size):
         super(WebDAVFile, self).__init__()
 
         self.fs = wdfs
         self.path = path
         self.res = self.fs.get_resource(self.path)
         self.mode = mode
+        self.size = size
         self._lock = threading.RLock()
         self.data = self._get_file_data()
 
@@ -56,9 +58,16 @@ class WebDAVFile(io.RawIOBase):
         if self.mode.reading:
             self.read(0)
 
+    def _init_file_data(self):
+        if self.fs.use_temp_files:
+            if self.fs.temp_path and not os.path.exists(self.fs.temp_path):
+                raise ValueError(f"Specified temp_path '{self.fs.temp_path}' does not exist.")
+            return tempfile.NamedTemporaryFile(dir=self.fs.temp_path)
+        return io.BytesIO()
+
     def _get_file_data(self):
         with self._lock:
-            data = io.BytesIO()
+            data = self._init_file_data()
             try:
                 self.res.write_to(data)
                 if not self.mode.appending:
@@ -68,12 +77,8 @@ class WebDAVFile(io.RawIOBase):
 
             return data
 
-    if six.PY2:
-        def __length_hint__(self):
-            return len(self.data.getvalue())
-    else:
-        def __length_hint__(self):
-            return self.data.getbuffer().nbytes
+    def __length_hint__(self):
+        return self.size
 
     def __repr__(self):
         _repr = "WebDAVFile({!r}, {!r}, {!r})"
@@ -158,9 +163,12 @@ class WebDAVFS(FS):
     }
 
     def __init__(self, url, login=None, password=None, root=None, timeout=None,
-                 cache_maxsize=10000, cache_ttl=60):
+                 cache_maxsize=10000, cache_ttl=60,
+                 use_temp_files=False, temp_path=None):
         self.url = url
         self.root = root
+        self.use_temp_files = use_temp_files
+        self.temp_path = temp_path
         super(WebDAVFS, self).__init__()
 
         options = {
@@ -319,6 +327,7 @@ class WebDAVFS(FS):
         _path = self.validatepath(path)
 
         log.debug("openbin: %s, %s", path, mode)
+        info = None
         with self._lock:
             try:
                 info = self.getinfo(_path)
@@ -334,7 +343,8 @@ class WebDAVFS(FS):
                     raise errors.FileExpected(path)
                 if _mode.exclusive:
                     raise errors.FileExists(path)
-        return WebDAVFile(self, _path, _mode)
+        size = info.size if info else 0
+        return WebDAVFile(self, _path, _mode, size)
 
     def remove(self, path):
         _path = self.validatepath(path)
