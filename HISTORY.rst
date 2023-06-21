@@ -1,6 +1,16 @@
 Release notes
 =============
 
+
+0.4.3 (2023/06/21)
+------------------
+
+-  Merge pull request #34 from davelopez/avoid_entire_file_in_memory
+   Avoid loading entire file in memory
+
+-  Get file size from remote info
+
+
 0.4.2 (2021/03/10)
 ------------------
 - added caching support
