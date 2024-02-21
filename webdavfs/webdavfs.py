@@ -266,6 +266,12 @@ class WebDAVFS(FS):
             if path in self.info_cache:
                 info = self.info_cache[path]
             else:
+                from urllib.parse import urlparse
+                import os
+                parsed_url = urlparse(self.client.webdav.hostname)
+                parent_path = os.path.join(parsed_url.path, _path.strip('/'))
+                if not parent_path.endswith('/'):
+                    parent_path += '/'
                 response = self.client.execute_request(action='info',
                                                        path=urn.quote())
                 info = wc.WebDavXmlUtils.parse_info_response(content=response.content, path=path, hostname=self.client.webdav.hostname)
@@ -275,6 +281,8 @@ class WebDAVFS(FS):
                     info['isdir'] = True
                     info['files'] = []
                     for i in wc.WebDavXmlUtils.parse_get_list_info_response(response.content):
+                        if parent_path == i['path']:
+                            continue
                         if i['path'].rstrip('/') != path.rstrip('/'):
                             if i['name'] is None:
                                 i['name'] = i['path'].split("/")[-1]
